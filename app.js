@@ -1532,7 +1532,6 @@ function finishInterfaceTour() {
     if (tourReturnFocus && typeof tourReturnFocus.focus === 'function' && document.contains(tourReturnFocus)) {
         tourReturnFocus.focus({ preventScroll: true });
     }
-    if (!onboardingFlagIsSet(PROJECT_GUIDE_STORAGE_KEY)) setTimeout(() => startProjectCoach(), 220);
 }
 
 function renderProjectCoachStep(shouldScroll = true) {
@@ -1667,7 +1666,6 @@ refreshOnboardingLanguage = () => {
 
 function initializeOnboarding() {
     if (!onboardingFlagIsSet(TOUR_STORAGE_KEY)) setTimeout(startInterfaceTour, 480);
-    else if (!onboardingFlagIsSet(PROJECT_GUIDE_STORAGE_KEY)) setTimeout(() => startProjectCoach(), 480);
 }
 
 applyLanguage(currentLanguage, false);
