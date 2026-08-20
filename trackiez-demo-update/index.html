@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#191b1f">
+    <meta name="description" content="Trackiez — браузерный инструмент для добавления трекинг-графики и визуальных эффектов в видео. Обрабатывайте и экспортируйте клипы прямо на своём устройстве.">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Trackiez">
+    <meta property="og:title" content="Trackiez — Digital Art Tool">
+    <meta property="og:description" content="Add tracking graphics and visual effects to video. Everything runs privately in your browser.">
+    <meta property="og:url" content="https://trackiez.markmazin.com/">
+    <meta property="og:image" content="https://trackiez.markmazin.com/assets/trackiez-social-preview.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="A monochrome motion study with magenta Trackiez tracking graphics">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Trackiez — Digital Art Tool">
+    <meta name="twitter:description" content="Add tracking graphics and visual effects to video. Everything runs privately in your browser.">
+    <meta name="twitter:image" content="https://trackiez.markmazin.com/assets/trackiez-social-preview.png">
+    <meta name="twitter:image:alt" content="A monochrome motion study with magenta Trackiez tracking graphics">
+    <title>Trackiez — Digital Art Tool</title>
+    <link rel="canonical" href="https://trackiez.markmazin.com/">
+    <link rel="icon" href="favicon.ico" sizes="any">
+    <link rel="icon" href="favicon-32x32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="favicon-16x16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="manifest" href="site.webmanifest">
+    <link rel="stylesheet" href="styles.css?v=12">
+</head>
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <a class="brand" href="#" aria-label="Trackiez — Digital Art Tool">
+                <span class="brand-logo"><img src="assets/trackiez-logo.png" alt="Trackiez"></span>
+            </a>
+
+            <nav class="header-nav" aria-label="Основная навигация" data-i18n-aria-label="mainNavigation">
+                <button type="button" id="howItWorksBtn" data-i18n="howItWorks">HOW IT WORKS</button>
+                <button type="button" id="aboutBtn" data-i18n="about">ABOUT</button>
+                <button type="button" id="contactsBtn" data-i18n="contacts">CONTACTS</button>
+            </nav>
+
+            <div class="topbar-actions">
+                <div class="language-switch" aria-label="Язык интерфейса" data-i18n-aria-label="languageLabel">
+                    <button class="language-option active" type="button" data-language="ru" aria-pressed="true">RU</button>
+                    <button class="language-option" type="button" data-language="en" aria-pressed="false">EN</button>
+                </div>
+                <label class="upload-button" for="videoUpload">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5 5 5M5 14v5h14v-5"/></svg>
+                    <span data-i18n="uploadVideo">Загрузить видео</span>
+                </label>
+            </div>
+            <input type="file" id="videoUpload" accept="video/mp4,video/webm,.mov,video/quicktime">
+        </header>
+
+        <main class="workspace">
+            <section class="stage-column" aria-label="Рабочая область">
+                <div class="stage-head">
+                    <div>
+                        <h1 data-i18n="workspace">РАБОЧАЯ ОБЛАСТЬ</h1>
+                    </div>
+                    <div class="stage-source">
+                        <span class="demo-badge" id="demoBadge" hidden>DEMO</span>
+                        <div class="file-meta">
+                            <span id="fileName" data-i18n="noSource">НЕТ ИСТОЧНИКА</span>
+                            <span id="resolutionLabel">— × —</span>
+                        </div>
+                        <label class="replace-video-button" id="replaceVideoButton" for="videoUpload" hidden>
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v6h-6"/></svg>
+                            <span data-i18n="replaceVideo">Другое видео</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="canvas-shell" id="uploadZone">
+                    <div class="stage-grid" aria-hidden="true"></div>
+                    <video id="videoElement" hidden muted loop playsinline preload="metadata"></video>
+                    <canvas id="canvasElement"></canvas>
+
+                    <label class="empty-state" id="emptyState" for="videoUpload">
+                        <span class="empty-index">[ <span data-i18n="drop">ПЕРЕТАЩИТЬ</span> / 01 ]</span>
+                        <span class="empty-symbol">
+                            <svg viewBox="0 0 56 56" aria-hidden="true"><path d="M28 39V12m0 0L17 23m11-11 11 11M12 34v10h32V34"/></svg>
+                        </span>
+                        <strong data-i18n="dropVideo">ПЕРЕТАЩИТЕ ВИДЕО</strong>
+                        <span data-i18n="chooseFile">или нажмите, чтобы выбрать файл</span>
+                        <small>MP4 · WEBM · MOV</small>
+                    </label>
+                </div>
+
+                <div class="transport">
+                    <button id="playPauseBtn" class="icon-button play-button" type="button" aria-label="Пауза">
+                        <svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6v12M16 6v12"/></svg>
+                        <span data-i18n="pause">Пауза</span>
+                    </button>
+
+                    <div class="timeline-wrap">
+                        <div class="timecode"><span id="currentTime">00:00</span><span>/</span><span id="duration">00:00</span></div>
+                        <input type="range" id="seekSlider" min="0" max="1000" value="0" aria-label="Позиция видео">
+                    </div>
+
+                    <div class="export-actions">
+                        <button id="screenshotBtn" class="secondary-button" type="button">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h4l2-3h4l2 3h4v11H4V8Z"/><circle cx="12" cy="13" r="3"/></svg>
+                            <span data-i18n="frame">Кадр</span>
+                        </button>
+                        <button id="recordBtn" class="record-button" type="button">
+                            <i></i><span data-i18n="record">Записать</span>
+                        </button>
+                    </div>
+                    <span id="recordStatus" role="status" aria-live="polite"></span>
+                </div>
+            </section>
+
+            <aside class="inspector" aria-label="Настройки обработки">
+                <div class="inspector-head">
+                    <div>
+                        <span class="eyebrow" data-i18n="controlSurface">ПАНЕЛЬ УПРАВЛЕНИЯ</span>
+                        <h2 data-i18n="parameters">ПАРАМЕТРЫ</h2>
+                    </div>
+                    <span class="live-dot" data-i18n="live">АКТИВНО</span>
+                </div>
+
+                <details class="panel-section" id="trackingPanel" open>
+                    <summary><span><b>01</b> <span data-i18n="tracking">Трекинг</span></span><i></i></summary>
+                    <div class="section-body">
+                        <label class="field-label" for="trackingMode" data-i18n="detectionMethod">Метод обнаружения</label>
+                        <div class="select-wrap">
+                            <select id="trackingMode">
+                                <option value="color" data-i18n="colorSearch">Поиск по цвету</option>
+                                <option value="ai" data-i18n="aiNetwork">AI / Нейросеть</option>
+                            </select>
+                        </div>
+
+                        <div id="colorSettingsBlock" class="settings-block">
+                            <div class="field-row">
+                                <label for="colorSelectTrigger" data-i18n="targetColor">Искомый цвет</label>
+                                <div class="color-picker">
+                                    <select id="colorSelect" class="visually-hidden-control" tabindex="-1" aria-hidden="true">
+                                        <option value="red" data-i18n="red">Красный</option>
+                                        <option value="green" data-i18n="green">Зелёный</option>
+                                        <option value="blue" data-i18n="blue">Синий</option>
+                                        <option value="yellow" data-i18n="yellow">Жёлтый</option>
+                                        <option value="white" data-i18n="white">Белый</option>
+                                        <option value="black" data-i18n="black">Чёрный</option>
+                                    </select>
+                                    <button class="color-picker-trigger" id="colorSelectTrigger" type="button" aria-haspopup="true" aria-expanded="false" data-label-key="targetColor">
+                                        <span class="color-current" aria-hidden="true"></span><i aria-hidden="true"></i>
+                                    </button>
+                                    <div class="color-swatches" data-color-select="colorSelect" role="radiogroup" data-i18n-aria-label="targetColor" hidden>
+                                        <button type="button" class="color-swatch active" data-value="red" style="--swatch:#ff3b3b" role="radio" aria-checked="true" data-i18n-aria-label="red" data-i18n-title="red"></button>
+                                        <button type="button" class="color-swatch" data-value="green" style="--swatch:#32d06d" role="radio" aria-checked="false" data-i18n-aria-label="green" data-i18n-title="green"></button>
+                                        <button type="button" class="color-swatch" data-value="blue" style="--swatch:#3f7cff" role="radio" aria-checked="false" data-i18n-aria-label="blue" data-i18n-title="blue"></button>
+                                        <button type="button" class="color-swatch" data-value="yellow" style="--swatch:#ffd93d" role="radio" aria-checked="false" data-i18n-aria-label="yellow" data-i18n-title="yellow"></button>
+                                        <button type="button" class="color-swatch light-swatch" data-value="white" style="--swatch:#ffffff" role="radio" aria-checked="false" data-i18n-aria-label="white" data-i18n-title="white"></button>
+                                        <button type="button" class="color-swatch dark-swatch" data-value="black" style="--swatch:#050505" role="radio" aria-checked="false" data-i18n-aria-label="black" data-i18n-title="black"></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="range-field">
+                                <div><label for="toleranceSlider" data-i18n="sensitivity">Чувствительность</label><output id="toleranceValue">50</output></div>
+                                <input type="range" id="toleranceSlider" min="10" max="150" value="50">
+                            </div>
+                            <div class="range-field">
+                                <div><label for="minSizeSlider" data-i18n="minSize">Мин. размер</label><output><span id="minSizeValue">100</span> PX</output></div>
+                                <input type="range" id="minSizeSlider" min="10" max="1000" value="100">
+                            </div>
+                        </div>
+
+                        <div id="aiSettingsBlock" class="settings-block ai-block" style="display: none;">
+                            <label class="field-label" for="aiTargetSelect" data-i18n="aiTarget">AI-цель</label>
+                            <div class="select-wrap">
+                                <select id="aiTargetSelect">
+                                    <option value="face" data-i18n="face">Лицо человека</option>
+                                    <option value="eyes" data-i18n="eyes">Глаза / зрачки</option>
+                                    <option value="body" data-i18n="body">Фигура человека</option>
+                                    <option value="object" data-i18n="customObject">Класс объекта</option>
+                                </select>
+                            </div>
+                            <div id="aiObjectInputBlock" class="text-field" style="display: none;">
+                                <label for="aiObjectSearch" data-i18n="objectClass">Объект для отслеживания</label>
+                                <div class="object-combobox" id="objectCombobox">
+                                    <input type="hidden" id="aiObjectName" value="airplane">
+                                    <input type="text" id="aiObjectSearch" role="combobox" aria-autocomplete="list" aria-controls="aiObjectList" aria-expanded="false" autocomplete="off" autocapitalize="none" spellcheck="false" data-i18n-placeholder="objectSearchPlaceholder" placeholder="Начните вводить: собака или dog">
+                                    <div class="object-options" id="aiObjectList" role="listbox" hidden></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+
+                <details class="panel-section" id="overlayPanel" open>
+                    <summary><span><b>02</b> <span data-i18n="overlay">Оверлей</span></span><i></i></summary>
+                    <div class="section-body">
+                        <div class="two-columns">
+                            <div>
+                                <label class="field-label" for="vizShape" data-i18n="shape">Форма</label>
+                                <div class="select-wrap"><select id="vizShape"><option value="rect" data-i18n="rectangle">Прямоугольник</option><option value="circle" data-i18n="circle">Круг</option></select></div>
+                            </div>
+                            <div>
+                                <label class="field-label" for="vizColorTrigger" data-i18n="color">Цвет</label>
+                                <div class="color-picker"><select id="vizColor" class="visually-hidden-control" tabindex="-1" aria-hidden="true">
+                                    <option value="orange" data-i18n="orange">Оранжевый</option><option value="cyan" data-i18n="cyan">Циан</option><option value="white" data-i18n="white">Белый</option>
+                                    <option value="black" data-i18n="black">Чёрный</option><option value="red" data-i18n="red">Красный</option><option value="blue" data-i18n="blue">Синий</option>
+                                    <option value="pink" data-i18n="pink">Розовый</option><option value="lime" selected data-i18n="acid">Фуксия</option><option value="transparent" data-i18n="noBorder">Без рамки</option>
+                                </select>
+                                    <button class="color-picker-trigger" id="vizColorTrigger" type="button" aria-haspopup="true" aria-expanded="false" data-label-key="color">
+                                        <span class="color-current" aria-hidden="true"></span><i aria-hidden="true"></i>
+                                    </button>
+                                    <div class="color-swatches overlay-swatches" data-color-select="vizColor" role="radiogroup" data-i18n-aria-label="color" hidden>
+                                        <button type="button" class="color-swatch" data-value="orange" style="--swatch:#ffa500" role="radio" aria-checked="false" data-i18n-aria-label="orange" data-i18n-title="orange"></button>
+                                        <button type="button" class="color-swatch" data-value="cyan" style="--swatch:#00ffff" role="radio" aria-checked="false" data-i18n-aria-label="cyan" data-i18n-title="cyan"></button>
+                                        <button type="button" class="color-swatch light-swatch" data-value="white" style="--swatch:#ffffff" role="radio" aria-checked="false" data-i18n-aria-label="white" data-i18n-title="white"></button>
+                                        <button type="button" class="color-swatch dark-swatch" data-value="black" style="--swatch:#050505" role="radio" aria-checked="false" data-i18n-aria-label="black" data-i18n-title="black"></button>
+                                        <button type="button" class="color-swatch" data-value="red" style="--swatch:#ff3b3b" role="radio" aria-checked="false" data-i18n-aria-label="red" data-i18n-title="red"></button>
+                                        <button type="button" class="color-swatch" data-value="blue" style="--swatch:#3f7cff" role="radio" aria-checked="false" data-i18n-aria-label="blue" data-i18n-title="blue"></button>
+                                        <button type="button" class="color-swatch" data-value="pink" style="--swatch:#ff1493" role="radio" aria-checked="false" data-i18n-aria-label="pink" data-i18n-title="pink"></button>
+                                        <button type="button" class="color-swatch active" data-value="lime" style="--swatch:#d129a1" role="radio" aria-checked="true" data-i18n-aria-label="acid" data-i18n-title="acid"></button>
+                                        <button type="button" class="color-swatch transparent-swatch" data-value="transparent" role="radio" aria-checked="false" data-i18n-aria-label="noBorder" data-i18n-title="noBorder"></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="range-field">
+                            <div><label for="lineWidthSlider" data-i18n="lineWidth">Толщина линии</label><output><span id="lineWidthValue">4</span> PX</output></div>
+                            <input type="range" id="lineWidthSlider" min="0" max="20" value="4">
+                        </div>
+                        <div class="range-field">
+                            <div><label for="smoothSlider" data-i18n="smoothness">Плавность</label><output id="smoothValue">0.2</output></div>
+                            <input type="range" id="smoothSlider" min="0.01" max="1" step="0.01" value="0.2">
+                        </div>
+                        <div class="text-field">
+                            <label for="labelText" data-i18n="labelText">Текст метки</label>
+                            <input type="text" id="labelText" value="Объект" data-i18n-placeholder="objectName" placeholder="Название объекта">
+                            <div class="label-controls">
+                                <label class="compact-check" for="hideLabelText">
+                                    <input type="checkbox" id="hideLabelText"><span aria-hidden="true"></span><em data-i18n="hideLabelText">Скрыть подпись</em>
+                                </label>
+                                <label class="compact-check" for="matchLabelColor">
+                                    <input type="checkbox" id="matchLabelColor"><span aria-hidden="true"></span><em data-i18n="matchLabelColor">Цвет как у обводки</em>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+
+                <details class="panel-section" id="effectsPanel" open>
+                    <summary><span><b>03</b> <span data-i18n="effects">Эффекты</span></span><i></i></summary>
+                    <div class="section-body effects-list">
+                        <label class="effect-card">
+                            <span><i>MONO</i><strong data-i18n="grayscale">Чёрно-белое</strong></span>
+                            <input class="effect-toggle" type="checkbox" id="effGrayscale"><em></em>
+                        </label>
+                        <label class="effect-card">
+                            <span><i>INV</i><strong data-i18n="invert">Инверсия</strong></span>
+                            <input class="effect-toggle" type="checkbox" id="effInvert"><em></em>
+                        </label>
+                        <div class="effect-card with-options">
+                            <label><span><i>POST</i><strong data-i18n="posterize">Постеризация</strong></span><input class="effect-toggle" type="checkbox" id="effPosterize"><em></em></label>
+                            <div class="effect-options"><input type="range" id="valPosterize" min="2" max="20" value="5" aria-label="Уровни постеризации"></div>
+                        </div>
+                        <div class="effect-card with-options">
+                            <label><span><i>PIXL</i><strong data-i18n="pixelate">Пикселизация</strong></span><input class="effect-toggle" type="checkbox" id="effPixelate"><em></em></label>
+                            <div class="effect-options"><input type="range" id="valPixelate" min="2" max="50" value="10" aria-label="Размер пикселя"></div>
+                        </div>
+                        <div class="effect-card with-options">
+                            <label><span><i>BLUR</i><strong data-i18n="radialBlur">Радиальное размытие</strong></span><input class="effect-toggle" type="checkbox" id="effBlur"><em></em></label>
+                            <div class="effect-options"><input type="range" id="valBlur" min="1" max="20" value="10" aria-label="Сила размытия"></div>
+                        </div>
+                    </div>
+                </details>
+
+                <div class="inspector-foot">
+                    <span>TRACKIEZ</span>
+                    <span>DIGITAL ART TOOL</span>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <dialog class="site-dialog" id="aboutDialog" aria-labelledby="aboutDialogTitle">
+        <div class="dialog-panel">
+            <button class="dialog-close" type="button" data-dialog-close aria-label="Закрыть" data-i18n-aria-label="closeDialog">×</button>
+            <span class="dialog-kicker">TRACKIEZ / 01</span>
+            <h2 id="aboutDialogTitle" data-i18n="about">ABOUT</h2>
+            <p class="dialog-lead" data-i18n="aboutCopy">Trackiez — инструмент для цифрового творчества в браузере. Добавляйте в видео трекинг-графику и визуальные эффекты, настраивайте результат и экспортируйте готовый клип. Всё работает локально — ваше видео не загружается на сервер.</p>
+            <div class="dialog-meta" aria-hidden="true">
+                <span>TRACK</span><span>STYLE</span><span>EXPORT</span>
+            </div>
+        </div>
+    </dialog>
+
+    <dialog class="site-dialog" id="contactsDialog" aria-labelledby="contactsDialogTitle">
+        <div class="dialog-panel">
+            <button class="dialog-close" type="button" data-dialog-close aria-label="Закрыть" data-i18n-aria-label="closeDialog">×</button>
+            <span class="dialog-kicker">TRACKIEZ / 02</span>
+            <h2 id="contactsDialogTitle" data-i18n="contacts">CONTACTS</h2>
+            <p class="dialog-lead">Trackiez was made by Mark Mazin. Please send me your feedback or tag me when you share your creations: <a href="https://www.instagram.com/markiethepirate/" target="_blank" rel="noopener noreferrer">@markiethepirate</a></p>
+        </div>
+    </dialog>
+
+    <dialog class="site-dialog guide-dialog" id="howItWorksDialog" aria-labelledby="howItWorksDialogTitle">
+        <div class="dialog-panel">
+            <button class="dialog-close" type="button" data-dialog-close aria-label="Закрыть" data-i18n-aria-label="closeDialog">×</button>
+            <span class="dialog-kicker">TRACKIEZ / GUIDE</span>
+            <h2 id="howItWorksDialogTitle" data-i18n="guideTitle">HOW IT WORKS</h2>
+            <p class="dialog-lead guide-intro" data-i18n="guideIntro">Пять шагов от исходного видео до готовой работы. Все вычисления происходят на вашем устройстве.</p>
+
+            <ol class="guide-steps">
+                <li>
+                    <span>01</span>
+                    <div>
+                        <h3 data-i18n="guideUploadTitle">Добавьте видео</h3>
+                        <p data-i18n="guideUploadBody">Загрузите MP4, WebM или MOV. Видео начнёт проигрываться автоматически; его можно поставить на паузу и продолжить настройку на выбранном кадре.</p>
+                    </div>
+                </li>
+                <li>
+                    <span>02</span>
+                    <div>
+                        <h3 data-i18n="guideTrackingTitle">Выберите, что отслеживать</h3>
+                        <p data-i18n="guideTrackingBody">Поиск по цвету подходит для яркого однотонного объекта. Режим нейросети умеет находить лица, глаза, фигуры людей и поддерживаемые классы объектов.</p>
+                        <dl class="guide-settings">
+                            <div><dt data-i18n="sensitivity">Чувствительность</dt><dd data-i18n="guideSensitivity">Чем выше значение, тем больше похожих оттенков попадёт в область трекинга.</dd></div>
+                            <div><dt data-i18n="minSize">Мин. размер</dt><dd data-i18n="guideMinSize">Отсекает маленькие пятна и случайный визуальный шум.</dd></div>
+                            <div><dt data-i18n="aiTarget">AI-цель</dt><dd data-i18n="guideAiTarget">Выберите тип цели. Для «Класса объекта» начните вводить название и выберите вариант из списка.</dd></div>
+                        </dl>
+                    </div>
+                </li>
+                <li>
+                    <span>03</span>
+                    <div>
+                        <h3 data-i18n="guideOverlayTitle">Настройте графику</h3>
+                        <p data-i18n="guideOverlayBody">Выберите прямоугольник или круг, цвет рамки и подпись. Изменения сразу видны и во время воспроизведения, и на паузе.</p>
+                        <dl class="guide-settings">
+                            <div><dt data-i18n="lineWidth">Толщина линии</dt><dd data-i18n="guideLineWidth">Значение 0 полностью скрывает рамку, оставляя эффект или подпись.</dd></div>
+                            <div><dt data-i18n="smoothness">Плавность</dt><dd data-i18n="guideSmoothness">Малое значение быстрее следует за целью; большое делает движение мягче, но добавляет задержку.</dd></div>
+                            <div><dt data-i18n="labelText">Текст метки</dt><dd data-i18n="guideLabel">Подпись можно изменить, скрыть или окрасить в цвет рамки.</dd></div>
+                        </dl>
+                    </div>
+                </li>
+                <li>
+                    <span>04</span>
+                    <div>
+                        <h3 data-i18n="guideEffectsTitle">Добавьте эффекты</h3>
+                        <p data-i18n="guideEffectsBody">Эффекты применяются внутри отслеживаемой области. Можно сочетать чёрно-белый режим, инверсию, постеризацию, пикселизацию и радиальное размытие.</p>
+                    </div>
+                </li>
+                <li>
+                    <span>05</span>
+                    <div>
+                        <h3 data-i18n="guideExportTitle">Сохраните результат</h3>
+                        <p data-i18n="guideExportBody">«Кадр» сохраняет текущий кадр как PNG. «Записать» захватывает обработанное видео; повторное нажатие завершает экспорт. Если MP4 недоступен, Trackiez предложит WebM или локальную конвертацию.</p>
+                    </div>
+                </li>
+            </ol>
+
+            <div class="guide-actions">
+                <button class="dialog-secondary" id="restartTourBtn" type="button" data-i18n="restartTour">ПОВТОРИТЬ ТУР</button>
+                <button class="dialog-primary" id="restartTipsBtn" type="button" data-i18n="restartTips">ПОКАЗАТЬ ПОДСКАЗКИ</button>
+            </div>
+        </div>
+    </dialog>
+
+    <dialog class="site-dialog export-dialog" id="exportDialog" aria-labelledby="exportDialogTitle">
+        <div class="dialog-panel">
+            <button class="dialog-close" id="exportDialogClose" type="button" data-dialog-close aria-label="Закрыть" data-i18n-aria-label="closeDialog">×</button>
+            <span class="dialog-kicker">EXPORT / WEBM</span>
+            <h2 id="exportDialogTitle" data-i18n="webmOnlyTitle">Этот браузер записывает только WebM</h2>
+            <p class="dialog-lead" data-i18n="webmOnlyBody">Вы можете скачать готовый WebM или конвертировать его в совместимый MP4 прямо на этом устройстве.</p>
+            <p class="local-note"><i aria-hidden="true"></i><span data-i18n="localConversionNote">Конвертация выполняется в браузере. Видео не отправляется на сервер.</span></p>
+            <div class="conversion-status" id="conversionStatus" role="status" aria-live="polite" hidden>
+                <span id="conversionStatusText" data-i18n="conversionPreparing">Подготовка конвертации…</span>
+                <div class="conversion-progress" aria-hidden="true"><i id="conversionProgressBar"></i></div>
+            </div>
+            <div class="dialog-actions">
+                <button class="dialog-secondary" id="downloadWebmBtn" type="button" data-i18n="downloadWebm">Скачать WebM</button>
+                <button class="dialog-primary" id="convertMp4Btn" type="button" data-i18n="convertMp4">Конвертировать в MP4</button>
+            </div>
+        </div>
+    </dialog>
+
+    <div class="tour-layer" id="tourLayer" hidden>
+        <div class="tour-spotlight" id="tourSpotlight" aria-hidden="true"></div>
+        <section class="tour-card" role="dialog" aria-modal="true" aria-labelledby="tourTitle" aria-describedby="tourBody">
+            <div class="tour-card-head">
+                <span id="tourProgress">01 / 05</span>
+                <button type="button" id="tourSkipBtn" data-i18n="skipTour">ПРОПУСТИТЬ</button>
+            </div>
+            <h2 id="tourTitle"></h2>
+            <p id="tourBody"></p>
+            <div class="tour-actions">
+                <button type="button" class="tour-back" id="tourBackBtn" data-i18n="back">НАЗАД</button>
+                <button type="button" class="tour-next" id="tourNextBtn" data-i18n="next">ДАЛЕЕ</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="coach-spotlight" id="coachSpotlight" aria-hidden="true" hidden></div>
+    <aside class="project-coach" id="projectCoach" aria-labelledby="coachTitle" aria-live="polite" hidden>
+        <div class="project-coach-head">
+            <span id="coachProgress">FIRST PROJECT · 01 / 05</span>
+            <button type="button" id="coachSkipBtn" data-i18n="skipTips">ПРОПУСТИТЬ</button>
+        </div>
+        <strong id="coachTitle"></strong>
+        <p id="coachBody"></p>
+        <button type="button" class="coach-next" id="coachNextBtn" data-i18n="next">ДАЛЕЕ</button>
+    </aside>
+
+    <aside class="demo-editor" id="demoEditorPanel" aria-labelledby="demoEditorTitle" hidden>
+        <div class="demo-editor-head">
+            <span>TRACKIEZ / INTERNAL</span>
+            <strong id="demoEditorTitle" data-i18n="demoEditorTitle">РЕДАКТОР ДЕМО</strong>
+        </div>
+        <p data-i18n="demoEditorHelp">Настройте выбранное видео обычными параметрами, затем сохраните его пресет.</p>
+        <div class="demo-editor-switch" role="group" data-i18n-aria-label="demoEditorVideoChoice">
+            <button type="button" data-demo-editor-select="trackin-1" data-i18n="demoOne">ВИДЕО 1</button>
+            <button type="button" data-demo-editor-select="trackin-2" data-i18n="demoTwo">ВИДЕО 2</button>
+        </div>
+        <div class="demo-editor-actions">
+            <button type="button" id="saveDemoPresetBtn" data-i18n="saveDemoPreset">СОХРАНИТЬ ПРЕСЕТ</button>
+            <button type="button" id="copyDemoPresetsBtn" data-i18n="copyDemoPresets">СКОПИРОВАТЬ ОБА</button>
+            <button type="button" id="resetDemoPresetsBtn" data-i18n="resetDemoPresets">СБРОСИТЬ</button>
+        </div>
+        <output id="demoEditorStatus" aria-live="polite"></output>
+    </aside>
+
+    <script src="app.js?v=17"></script>
+</body>
+</html>
