@@ -664,7 +664,7 @@ const USER_DEFAULT_PRESET = {
     effects: { grayscale: false, invert: false, posterize: false, posterizeLevels: 5, pixelate: false, pixelSize: 10, blur: false, blurStrength: 10 }
 };
 
-const DEMO_PRESET_STORAGE_KEY = 'trackiez-demo-preset-overrides-v1';
+const DEMO_PRESET_STORAGE_KEY = 'trackiez-demo-preset-overrides-v2';
 const DEMO_VIDEOS = [
     {
         id: 'trackin-1',
@@ -672,9 +672,9 @@ const DEMO_VIDEOS = [
         src: 'assets/demo/trackin-1.mp4',
         fileName: 'TRACKIN-1.MP4',
         preset: {
-            tracking: { mode: 'ai', color: 'black', tolerance: 70, minSize: 120, target: 'body', object: 'person' },
-            overlay: { shape: 'rect', color: 'lime', lineWidth: 4, smoothness: 0.18, label: 'TRACKIEZ / BODY', hideLabel: false, matchLabelColor: true },
-            effects: { grayscale: true, invert: true, posterize: false, posterizeLevels: 5, pixelate: false, pixelSize: 10, blur: false, blurStrength: 8 }
+            tracking: { mode: 'color', color: 'black', tolerance: 43, minSize: 517, target: 'body', object: 'person' },
+            overlay: { shape: 'circle', color: 'orange', lineWidth: 4, smoothness: 0.12, label: 'BXLLE+', hideLabel: false, matchLabelColor: true },
+            effects: { grayscale: false, invert: false, posterize: false, posterizeLevels: 6, pixelate: true, pixelSize: 8, blur: true, blurStrength: 9 }
         }
     },
     {
@@ -683,9 +683,9 @@ const DEMO_VIDEOS = [
         src: 'assets/demo/trackin-2.mp4',
         fileName: 'TRACKIN-2.MP4',
         preset: {
-            tracking: { mode: 'ai', color: 'black', tolerance: 55, minSize: 80, target: 'face', object: 'person' },
-            overlay: { shape: 'circle', color: 'lime', lineWidth: 4, smoothness: 0.22, label: 'TRACKIEZ / FACE', hideLabel: false, matchLabelColor: true },
-            effects: { grayscale: true, invert: true, posterize: false, posterizeLevels: 6, pixelate: false, pixelSize: 8, blur: true, blurStrength: 4 }
+            tracking: { mode: 'color', color: 'white', tolerance: 20, minSize: 276, target: 'object', object: 'person' },
+            overlay: { shape: 'rect', color: 'lime', lineWidth: 4, smoothness: 0.22, label: 'TRACKIEZ / FACE', hideLabel: false, matchLabelColor: true },
+            effects: { grayscale: true, invert: false, posterize: true, posterizeLevels: 6, pixelate: true, pixelSize: 4, blur: false, blurStrength: 4 }
         }
     }
 ];
