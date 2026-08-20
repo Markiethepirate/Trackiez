@@ -7,11 +7,13 @@ const uploadZone = document.getElementById('uploadZone');
 const fileName = document.getElementById('fileName');
 const resolutionLabel = document.getElementById('resolutionLabel');
 const replaceVideoButton = document.getElementById('replaceVideoButton');
+const demoBadge = document.getElementById('demoBadge');
 const seekSlider = document.getElementById('seekSlider');
 const currentTimeText = document.getElementById('currentTime');
 const durationText = document.getElementById('duration');
 
 let videoObjectUrl = null;
+let activeDemoId = null;
 
 const LANGUAGE_STORAGE_KEY = 'trackiez-language';
 const LANGUAGE_MANUAL_KEY = 'trackiez-language-manual';
@@ -67,10 +69,14 @@ const translations = {
         smoothness: 'Плавность', labelText: 'Текст метки', hideLabelText: 'Скрыть подпись', matchLabelColor: 'Цвет как у обводки', objectName: 'Название объекта', effects: 'Эффекты',
         grayscale: 'Чёрно-белое', invert: 'Инверсия', posterize: 'Постеризация', pixelate: 'Пикселизация',
         radialBlur: 'Радиальное размытие', defaultObject: 'Объект',
-        invalidVideo: 'ВЫБЕРИТЕ ВИДЕОФАЙЛ MP4, WEBM ИЛИ MOV', aiLoading: 'ЗАГРУЗКА AI-МОДЕЛИ...',
+        invalidVideo: 'ВЫБЕРИТЕ ВИДЕОФАЙЛ MP4, WEBM ИЛИ MOV', demoLoadError: 'НЕ УДАЛОСЬ ЗАГРУЗИТЬ ДЕМО-ВИДЕО', aiLoading: 'ЗАГРУЗКА AI-МОДЕЛИ...',
         aiReady: 'AI-МОДЕЛЬ ГОТОВА', aiError: 'ОШИБКА ЗАГРУЗКИ AI · ПРОВЕРЬТЕ ИНТЕРНЕТ',
         frameSaved: 'КАДР СОХРАНЁН', recording: 'ИДЁТ ЗАПИСЬ', videoSaved: 'ВИДЕО СОХРАНЕНО',
-        uploadFirst: 'Сначала загрузите видео!', closeDialog: 'Закрыть',
+        uploadFirst: 'Сначала загрузите видео!', closeDialog: 'Закрыть', demoLabel: 'ДЕМО',
+        demoEditorTitle: 'РЕДАКТОР ДЕМО', demoEditorHelp: 'Настройте выбранное видео обычными параметрами, затем сохраните его пресет.',
+        demoEditorVideoChoice: 'Выбор демо-видео', demoOne: 'ВИДЕО 1', demoTwo: 'ВИДЕО 2',
+        saveDemoPreset: 'СОХРАНИТЬ ПРЕСЕТ', copyDemoPresets: 'СКОПИРОВАТЬ ОБА', resetDemoPresets: 'СБРОСИТЬ',
+        demoPresetSaved: 'ПРЕСЕТ СОХРАНЁН', demoPresetsCopied: 'ОБА ПРЕСЕТА СКОПИРОВАНЫ', demoPresetsCopyFailed: 'НЕ УДАЛОСЬ СКОПИРОВАТЬ', demoPresetsReset: 'ПРЕСЕТЫ СБРОШЕНЫ',
         aboutCopy: 'Trackiez — инструмент для цифрового творчества в браузере. Добавляйте в видео трекинг-графику и визуальные эффекты, настраивайте результат и экспортируйте готовый клип. Всё работает локально — ваше видео не загружается на сервер.',
         webmOnlyTitle: 'Этот браузер записывает только WebM',
         webmOnlyBody: 'Вы можете скачать готовый WebM или конвертировать его в совместимый MP4 прямо на этом устройстве.',
@@ -95,7 +101,7 @@ const translations = {
         guideExportTitle: 'Сохраните результат', guideExportBody: '«Кадр» сохраняет текущий кадр как PNG. «Записать» захватывает обработанное видео; повторное нажатие завершает экспорт. Если MP4 недоступен, Trackiez предложит WebM или локальную конвертацию.',
         restartTour: 'ПОВТОРИТЬ ТУР', restartTips: 'ПОКАЗАТЬ ПОДСКАЗКИ', skipTour: 'ПРОПУСТИТЬ', skipTips: 'ПРОПУСТИТЬ',
         back: 'НАЗАД', next: 'ДАЛЕЕ', finish: 'ГОТОВО', firstProject: 'ПЕРВЫЙ ПРОЕКТ',
-        tourUploadTitle: 'Начните с видео', tourUploadBody: 'Перетащите файл в рабочую область или нажмите «Загрузить видео». Trackiez принимает MP4, WebM и MOV.',
+        tourUploadTitle: 'Посмотрите готовый пример', tourUploadBody: 'При входе Trackiez запускает демо с готовым пресетом. Посмотрите результат или нажмите «Загрузить видео», чтобы начать со своим MP4, WebM или MOV.',
         tourTrackingTitle: 'Скажите, что искать', tourTrackingBody: 'Выберите поиск по цвету или нейросеть, а затем уточните цвет, лицо, глаза, фигуру человека или класс объекта.',
         tourOverlayTitle: 'Создайте графику', tourOverlayBody: 'Здесь настраиваются форма, цвет и толщина рамки, плавность движения и текст подписи.',
         tourEffectsTitle: 'Измените изображение', tourEffectsBody: 'Эффекты работают внутри отслеживаемой области. Их можно включать по одному или сочетать.',
@@ -122,10 +128,14 @@ const translations = {
         smoothness: 'Smoothness', labelText: 'Label text', hideLabelText: 'Hide label', matchLabelColor: 'Match outline color', objectName: 'Object name', effects: 'Effects',
         grayscale: 'Grayscale', invert: 'Invert', posterize: 'Posterize', pixelate: 'Pixelate',
         radialBlur: 'Radial blur', defaultObject: 'Object',
-        invalidVideo: 'SELECT AN MP4, WEBM OR MOV VIDEO FILE', aiLoading: 'LOADING AI MODEL...',
+        invalidVideo: 'SELECT AN MP4, WEBM OR MOV VIDEO FILE', demoLoadError: 'COULD NOT LOAD THE DEMO VIDEO', aiLoading: 'LOADING AI MODEL...',
         aiReady: 'AI MODEL READY', aiError: 'AI LOAD ERROR · CHECK YOUR CONNECTION',
         frameSaved: 'FRAME SAVED', recording: 'RECORDING', videoSaved: 'VIDEO SAVED',
-        uploadFirst: 'Upload a video first!', closeDialog: 'Close',
+        uploadFirst: 'Upload a video first!', closeDialog: 'Close', demoLabel: 'DEMO',
+        demoEditorTitle: 'DEMO EDITOR', demoEditorHelp: 'Adjust the selected video with the regular controls, then save its preset.',
+        demoEditorVideoChoice: 'Demo video choice', demoOne: 'VIDEO 1', demoTwo: 'VIDEO 2',
+        saveDemoPreset: 'SAVE PRESET', copyDemoPresets: 'COPY BOTH', resetDemoPresets: 'RESET',
+        demoPresetSaved: 'PRESET SAVED', demoPresetsCopied: 'BOTH PRESETS COPIED', demoPresetsCopyFailed: 'COPY FAILED', demoPresetsReset: 'PRESETS RESET',
         aboutCopy: 'Trackiez is a digital art tool for adding tracking graphics and visual effects to video. Upload a clip, choose what to track, customize the result, and export the finished video. Everything runs locally in your browser — your video is never uploaded to a server.',
         webmOnlyTitle: 'This browser can only record WebM',
         webmOnlyBody: 'Download the finished WebM or convert it to a compatible MP4 directly on this device.',
@@ -150,7 +160,7 @@ const translations = {
         guideExportTitle: 'Save the result', guideExportBody: 'Frame saves the current image as a PNG. Record captures the processed video; press it again to finish. If MP4 is unavailable, Trackiez offers WebM or local conversion.',
         restartTour: 'REPLAY INTERFACE TOUR', restartTips: 'SHOW PROJECT TIPS', skipTour: 'SKIP TOUR', skipTips: 'SKIP TIPS',
         back: 'BACK', next: 'NEXT', finish: 'FINISH', firstProject: 'FIRST PROJECT',
-        tourUploadTitle: 'Start with a video', tourUploadBody: 'Drop a file into the workspace or select Upload video. Trackiez accepts MP4, WebM and MOV.',
+        tourUploadTitle: 'Explore a finished example', tourUploadBody: 'Trackiez opens with a demo and a ready-made preset. Explore the result or select Upload video to start with your own MP4, WebM or MOV.',
         tourTrackingTitle: 'Tell Trackiez what to find', tourTrackingBody: 'Choose color search or neural tracking, then select a color, face, eyes, person or supported object class.',
         tourOverlayTitle: 'Create the graphic', tourOverlayBody: 'Set the shape, outline color and width, motion smoothness and label text here.',
         tourEffectsTitle: 'Transform the image', tourEffectsBody: 'Effects work inside the tracked area. Use one effect or combine several.',
@@ -213,6 +223,7 @@ function applyLanguage(language, persistSelection = true) {
     if (typeof syncColorPickerLabels === 'function') syncColorPickerLabels();
     if (typeof refreshObjectComboboxLanguage === 'function') refreshObjectComboboxLanguage();
     if (typeof refreshOnboardingLanguage === 'function') refreshOnboardingLanguage();
+    if (typeof updateDemoBadge === 'function') updateDemoBadge();
 
     if (persistSelection) {
         try {
@@ -647,31 +658,174 @@ minSizeSlider.addEventListener('input', () => minSizeValueText.textContent = min
 smoothSlider.addEventListener('input', () => smoothValueText.textContent = smoothSlider.value);
 lineWidthSlider.addEventListener('input', () => lineWidthValueText.textContent = lineWidthSlider.value);
 
+const USER_DEFAULT_PRESET = {
+    tracking: { mode: 'color', color: 'red', tolerance: 50, minSize: 100, target: 'face', object: 'airplane' },
+    overlay: { shape: 'rect', color: 'lime', lineWidth: 4, smoothness: 0.2, label: null, hideLabel: false, matchLabelColor: false },
+    effects: { grayscale: false, invert: false, posterize: false, posterizeLevels: 5, pixelate: false, pixelSize: 10, blur: false, blurStrength: 10 }
+};
+
+const DEMO_PRESET_STORAGE_KEY = 'trackiez-demo-preset-overrides-v1';
+const DEMO_VIDEOS = [
+    {
+        id: 'trackin-1',
+        number: '01',
+        src: 'assets/demo/trackin-1.mp4',
+        fileName: 'TRACKIN-1.MP4',
+        preset: {
+            tracking: { mode: 'ai', color: 'black', tolerance: 70, minSize: 120, target: 'body', object: 'person' },
+            overlay: { shape: 'rect', color: 'lime', lineWidth: 4, smoothness: 0.18, label: 'TRACKIEZ / BODY', hideLabel: false, matchLabelColor: true },
+            effects: { grayscale: true, invert: true, posterize: false, posterizeLevels: 5, pixelate: false, pixelSize: 10, blur: false, blurStrength: 8 }
+        }
+    },
+    {
+        id: 'trackin-2',
+        number: '02',
+        src: 'assets/demo/trackin-2.mp4',
+        fileName: 'TRACKIN-2.MP4',
+        preset: {
+            tracking: { mode: 'ai', color: 'black', tolerance: 55, minSize: 80, target: 'face', object: 'person' },
+            overlay: { shape: 'circle', color: 'lime', lineWidth: 4, smoothness: 0.22, label: 'TRACKIEZ / FACE', hideLabel: false, matchLabelColor: true },
+            effects: { grayscale: true, invert: true, posterize: false, posterizeLevels: 6, pixelate: false, pixelSize: 8, blur: true, blurStrength: 4 }
+        }
+    }
+];
+
+function clonePreset(preset) {
+    return JSON.parse(JSON.stringify(preset));
+}
+
+function readDemoPresetOverrides() {
+    try {
+        const value = JSON.parse(localStorage.getItem(DEMO_PRESET_STORAGE_KEY) || '{}');
+        return value && typeof value === 'object' ? value : {};
+    } catch (error) {
+        return {};
+    }
+}
+
+function writeDemoPresetOverrides(overrides) {
+    try { localStorage.setItem(DEMO_PRESET_STORAGE_KEY, JSON.stringify(overrides)); } catch (error) {}
+}
+
+function getDemoConfig(id) {
+    return DEMO_VIDEOS.find(demo => demo.id === id) || DEMO_VIDEOS[0];
+}
+
+function getDemoPreset(demo) {
+    const override = readDemoPresetOverrides()[demo.id];
+    return clonePreset(override && override.tracking && override.overlay && override.effects ? override : demo.preset);
+}
+
+function applyPreset(preset) {
+    if (!preset) return;
+
+    const tracking = preset.tracking || {};
+    const overlay = preset.overlay || {};
+    const effects = preset.effects || {};
+
+    trackingMode.value = tracking.mode === 'ai' ? 'ai' : 'color';
+    colorSelect.value = tracking.color || 'red';
+    toleranceSlider.value = String(tracking.tolerance ?? 50);
+    minSizeSlider.value = String(tracking.minSize ?? 100);
+    aiTargetSelect.value = ['face', 'eyes', 'body', 'object'].includes(tracking.target) ? tracking.target : 'face';
+
+    const requestedObject = objectClasses.find(item => item.key === tracking.object) || objectClasses[0];
+    selectedObjectKey = requestedObject.key;
+    aiObjectName.value = requestedObject.key;
+    aiObjectSearch.value = objectInputValue(requestedObject);
+
+    vizShape.value = overlay.shape === 'circle' ? 'circle' : 'rect';
+    vizColor.value = Array.from(vizColor.options).some(option => option.value === overlay.color) ? overlay.color : 'lime';
+    lineWidthSlider.value = String(overlay.lineWidth ?? 4);
+    smoothSlider.value = String(overlay.smoothness ?? 0.2);
+    labelText.value = overlay.label === null || overlay.label === undefined ? t('defaultObject') : String(overlay.label);
+    hideLabelText.checked = Boolean(overlay.hideLabel);
+    matchLabelColor.checked = Boolean(overlay.matchLabelColor);
+
+    effGrayscale.checked = Boolean(effects.grayscale);
+    effInvert.checked = Boolean(effects.invert);
+    effPosterize.checked = Boolean(effects.posterize);
+    valPosterize.value = String(effects.posterizeLevels ?? 5);
+    effPixelate.checked = Boolean(effects.pixelate);
+    valPixelate.value = String(effects.pixelSize ?? 10);
+    effBlur.checked = Boolean(effects.blur);
+    valBlur.value = String(effects.blurStrength ?? 10);
+
+    colorSettingsBlock.style.display = trackingMode.value === 'color' ? 'flex' : 'none';
+    aiSettingsBlock.style.display = trackingMode.value === 'ai' ? 'flex' : 'none';
+    aiObjectInputBlock.style.display = aiTargetSelect.value === 'object' ? 'flex' : 'none';
+
+    toleranceValueText.textContent = toleranceSlider.value;
+    minSizeValueText.textContent = minSizeSlider.value;
+    lineWidthValueText.textContent = lineWidthSlider.value;
+    smoothValueText.textContent = smoothSlider.value;
+    [toleranceSlider, minSizeSlider, lineWidthSlider, smoothSlider, valPosterize, valPixelate, valBlur].forEach(updateRangeProgress);
+    syncColorPickerLabels();
+
+    previousBlobs = [];
+    lastVideoTime = -1;
+    lastAiResults = null;
+    if (trackingMode.value === 'ai') initializeAI();
+    schedulePausedPreview();
+}
+
+function readPresetFromControls() {
+    return {
+        tracking: {
+            mode: trackingMode.value,
+            color: colorSelect.value,
+            tolerance: Number(toleranceSlider.value),
+            minSize: Number(minSizeSlider.value),
+            target: aiTargetSelect.value,
+            object: aiObjectName.value || selectedObjectKey
+        },
+        overlay: {
+            shape: vizShape.value,
+            color: vizColor.value,
+            lineWidth: Number(lineWidthSlider.value),
+            smoothness: Number(smoothSlider.value),
+            label: labelText.value,
+            hideLabel: hideLabelText.checked,
+            matchLabelColor: matchLabelColor.checked
+        },
+        effects: {
+            grayscale: effGrayscale.checked,
+            invert: effInvert.checked,
+            posterize: effPosterize.checked,
+            posterizeLevels: Number(valPosterize.value),
+            pixelate: effPixelate.checked,
+            pixelSize: Number(valPixelate.value),
+            blur: effBlur.checked,
+            blurStrength: Number(valBlur.value)
+        }
+    };
+}
+
 const fxCanvas = document.createElement('canvas');
 const fxCtx = fxCanvas.getContext('2d', { willReadFrequently: true });
 const tmpCanvas = document.createElement('canvas');
 const tmpCtx = tmpCanvas.getContext('2d');
 
-function loadVideoFile(file) {
-    if (!file) return;
-
-    const isVideo = file.type.startsWith('video/') || file.name.toLowerCase().endsWith('.mov');
-    if (!isVideo) {
-        recordStatus.textContent = t('invalidVideo');
-        recordStatus.style.color = '#ff4e52';
-        return;
-    }
-
+function loadVideoSource(source, { name, demo = null, objectUrl = null } = {}) {
     video.pause();
     stopRenderLoop();
     if (videoObjectUrl) URL.revokeObjectURL(videoObjectUrl);
-    videoObjectUrl = URL.createObjectURL(file);
-    video.src = videoObjectUrl;
+    videoObjectUrl = objectUrl;
+    activeDemoId = demo ? demo.id : null;
+    video.src = source;
     video.loop = true;
-    fileName.textContent = file.name.toUpperCase();
+    video.muted = true;
+    video.playsInline = true;
+    fileName.textContent = String(name || 'VIDEO').toUpperCase();
     fileName.removeAttribute('data-i18n');
     uploadZone.classList.add('has-video');
     replaceVideoButton.hidden = false;
+    demoBadge.hidden = !demo;
+    updateDemoBadge();
+    updateDemoEditorSelection();
+    currentTimeText.textContent = '00:00';
+    seekSlider.value = 0;
+    updateRangeProgress(seekSlider);
 
     video.onloadeddata = function() {
         const MAX_SIZE = 1280;
@@ -695,6 +849,137 @@ function loadVideoFile(file) {
         });
         advanceProjectCoach('video');
     };
+
+    video.onerror = function() {
+        recordStatus.textContent = t(demo ? 'demoLoadError' : 'invalidVideo');
+        recordStatus.style.color = '#ff4e52';
+    };
+
+    video.load();
+}
+
+function loadDemoVideo(demoOrId) {
+    const demo = typeof demoOrId === 'string' ? getDemoConfig(demoOrId) : demoOrId;
+    applyPreset(getDemoPreset(demo));
+    loadVideoSource(demo.src, { name: demo.fileName, demo });
+}
+
+function loadVideoFile(file) {
+    if (!file) return;
+
+    const isVideo = file.type.startsWith('video/') || file.name.toLowerCase().endsWith('.mov');
+    if (!isVideo) {
+        recordStatus.textContent = t('invalidVideo');
+        recordStatus.style.color = '#ff4e52';
+        return;
+    }
+
+    applyPreset(USER_DEFAULT_PRESET);
+    const objectUrl = URL.createObjectURL(file);
+    loadVideoSource(objectUrl, { name: file.name, objectUrl });
+}
+
+const demoEditorPanel = document.getElementById('demoEditorPanel');
+const demoEditorStatus = document.getElementById('demoEditorStatus');
+const demoEditorSelectButtons = Array.from(document.querySelectorAll('[data-demo-editor-select]'));
+const demoEditorEnabled = new URLSearchParams(window.location.search).get('demo-editor') === '1';
+
+function updateDemoBadge() {
+    if (!activeDemoId) {
+        demoBadge.hidden = true;
+        return;
+    }
+    const demo = getDemoConfig(activeDemoId);
+    demoBadge.hidden = false;
+    demoBadge.textContent = `${t('demoLabel')} ${demo.number}`;
+}
+
+function updateDemoEditorSelection() {
+    demoEditorSelectButtons.forEach(button => {
+        const isActive = button.dataset.demoEditorSelect === activeDemoId;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-pressed', String(isActive));
+    });
+}
+
+function setDemoEditorStatus(key, isError = false) {
+    demoEditorStatus.textContent = t(key);
+    demoEditorStatus.classList.toggle('is-error', isError);
+}
+
+function saveCurrentDemoPreset() {
+    if (!activeDemoId) return false;
+    const overrides = readDemoPresetOverrides();
+    overrides[activeDemoId] = readPresetFromControls();
+    writeDemoPresetOverrides(overrides);
+    setDemoEditorStatus('demoPresetSaved');
+    return true;
+}
+
+async function copyTextToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return;
+    }
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    const copied = document.execCommand('copy');
+    textarea.remove();
+    if (!copied) throw new Error('Clipboard unavailable');
+}
+
+async function copyAllDemoPresets() {
+    saveCurrentDemoPreset();
+    const presets = Object.fromEntries(DEMO_VIDEOS.map(demo => [demo.id, getDemoPreset(demo)]));
+    try {
+        await copyTextToClipboard(JSON.stringify(presets, null, 2));
+        setDemoEditorStatus('demoPresetsCopied');
+    } catch (error) {
+        setDemoEditorStatus('demoPresetsCopyFailed', true);
+    }
+}
+
+function resetDemoPresets() {
+    try { localStorage.removeItem(DEMO_PRESET_STORAGE_KEY); } catch (error) {}
+    const selectedDemo = getDemoConfig(activeDemoId);
+    loadDemoVideo(selectedDemo);
+    setDemoEditorStatus('demoPresetsReset');
+}
+
+function chooseRandomDemo() {
+    if (window.crypto && typeof window.crypto.getRandomValues === 'function') {
+        const randomValue = new Uint32Array(1);
+        window.crypto.getRandomValues(randomValue);
+        return DEMO_VIDEOS[randomValue[0] % DEMO_VIDEOS.length];
+    }
+    return DEMO_VIDEOS[Math.floor(Math.random() * DEMO_VIDEOS.length)];
+}
+
+function initializeDemoExperience() {
+    let selectedDemo = chooseRandomDemo();
+
+    if (demoEditorEnabled) {
+        demoEditorPanel.hidden = false;
+        const requestedDemoId = new URLSearchParams(window.location.search).get('demo');
+        if (requestedDemoId) selectedDemo = getDemoConfig(requestedDemoId);
+
+        demoEditorSelectButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                saveCurrentDemoPreset();
+                loadDemoVideo(button.dataset.demoEditorSelect);
+            });
+        });
+        document.getElementById('saveDemoPresetBtn').addEventListener('click', saveCurrentDemoPreset);
+        document.getElementById('copyDemoPresetsBtn').addEventListener('click', copyAllDemoPresets);
+        document.getElementById('resetDemoPresetsBtn').addEventListener('click', resetDemoPresets);
+    }
+
+    loadDemoVideo(selectedDemo);
 }
 
 videoUpload.addEventListener('click', () => { videoUpload.value = ''; });
@@ -1665,10 +1950,12 @@ refreshOnboardingLanguage = () => {
 };
 
 function initializeOnboarding() {
+    if (demoEditorEnabled) return;
     if (!onboardingFlagIsSet(TOUR_STORAGE_KEY)) setTimeout(startInterfaceTour, 480);
 }
 
 applyLanguage(currentLanguage, false);
+initializeDemoExperience();
 window.addEventListener('load', initializeOnboarding, { once: true });
 
 function initializeCursorTrail() {

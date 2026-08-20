@@ -27,7 +27,7 @@
     <link rel="icon" href="favicon-16x16.png" type="image/png" sizes="16x16">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="site.webmanifest">
-    <link rel="stylesheet" href="styles.css?v=11">
+    <link rel="stylesheet" href="styles.css?v=12">
 </head>
 <body>
     <div class="app-shell">
@@ -62,6 +62,7 @@
                         <h1 data-i18n="workspace">РАБОЧАЯ ОБЛАСТЬ</h1>
                     </div>
                     <div class="stage-source">
+                        <span class="demo-badge" id="demoBadge" hidden>DEMO</span>
                         <div class="file-meta">
                             <span id="fileName" data-i18n="noSource">НЕТ ИСТОЧНИКА</span>
                             <span id="resolutionLabel">— × —</span>
@@ -407,6 +408,24 @@
         <button type="button" class="coach-next" id="coachNextBtn" data-i18n="next">ДАЛЕЕ</button>
     </aside>
 
-    <script src="app.js?v=16"></script>
+    <aside class="demo-editor" id="demoEditorPanel" aria-labelledby="demoEditorTitle" hidden>
+        <div class="demo-editor-head">
+            <span>TRACKIEZ / INTERNAL</span>
+            <strong id="demoEditorTitle" data-i18n="demoEditorTitle">РЕДАКТОР ДЕМО</strong>
+        </div>
+        <p data-i18n="demoEditorHelp">Настройте выбранное видео обычными параметрами, затем сохраните его пресет.</p>
+        <div class="demo-editor-switch" role="group" data-i18n-aria-label="demoEditorVideoChoice">
+            <button type="button" data-demo-editor-select="trackin-1" data-i18n="demoOne">ВИДЕО 1</button>
+            <button type="button" data-demo-editor-select="trackin-2" data-i18n="demoTwo">ВИДЕО 2</button>
+        </div>
+        <div class="demo-editor-actions">
+            <button type="button" id="saveDemoPresetBtn" data-i18n="saveDemoPreset">СОХРАНИТЬ ПРЕСЕТ</button>
+            <button type="button" id="copyDemoPresetsBtn" data-i18n="copyDemoPresets">СКОПИРОВАТЬ ОБА</button>
+            <button type="button" id="resetDemoPresetsBtn" data-i18n="resetDemoPresets">СБРОСИТЬ</button>
+        </div>
+        <output id="demoEditorStatus" aria-live="polite"></output>
+    </aside>
+
+    <script src="app.js?v=17"></script>
 </body>
 </html>
