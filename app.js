@@ -15,6 +15,37 @@ const durationText = document.getElementById('duration');
 let videoObjectUrl = null;
 let activeDemoId = null;
 
+const analyticsQueue = [];
+const trackedEditorAreas = new Set();
+
+function flushAnalyticsQueue() {
+    if (!window.trackiezAnalyticsEnabled || !window.umami || typeof window.umami.track !== 'function') return;
+    while (analyticsQueue.length) {
+        const [eventName, eventData] = analyticsQueue.shift();
+        if (eventData === undefined) window.umami.track(eventName);
+        else window.umami.track(eventName, eventData);
+    }
+}
+
+function trackAnalytics(eventName, eventData) {
+    if (!window.trackiezAnalyticsEnabled) return;
+    if (window.umami && typeof window.umami.track === 'function') {
+        if (eventData === undefined) window.umami.track(eventName);
+        else window.umami.track(eventName, eventData);
+        return;
+    }
+    analyticsQueue.push([eventName, eventData]);
+}
+
+function trackEditorInteraction(area) {
+    if (trackedEditorAreas.has(area)) return;
+    trackedEditorAreas.add(area);
+    trackAnalytics('editor_interacted', { area });
+}
+
+window.addEventListener('trackiez:analytics-ready', flushAnalyticsQueue);
+window.setTimeout(flushAnalyticsQueue, 2000);
+
 const LANGUAGE_STORAGE_KEY = 'trackiez-language';
 const LANGUAGE_MANUAL_KEY = 'trackiez-language-manual';
 const RUSSIAN_INTERFACE_LANGUAGES = new Set(['ru', 'be']);
@@ -236,7 +267,12 @@ function applyLanguage(language, persistSelection = true) {
 }
 
 document.querySelectorAll('.language-option').forEach(button => {
-    button.addEventListener('click', () => applyLanguage(button.dataset.language));
+    button.addEventListener('click', () => {
+        const language = button.dataset.language;
+        const languageChanged = currentLanguage !== language;
+        applyLanguage(language);
+        if (languageChanged) trackAnalytics('language_changed', { language });
+    });
 });
 
 const aboutDialog = document.getElementById('aboutDialog');
@@ -258,7 +294,10 @@ function closeSiteDialog(dialog) {
 
 document.getElementById('aboutBtn').addEventListener('click', () => openSiteDialog(aboutDialog));
 document.getElementById('contactsBtn').addEventListener('click', () => openSiteDialog(contactsDialog));
-document.getElementById('howItWorksBtn').addEventListener('click', () => openSiteDialog(howItWorksDialog));
+document.getElementById('howItWorksBtn').addEventListener('click', () => {
+    trackAnalytics('how_it_works_opened');
+    openSiteDialog(howItWorksDialog);
+});
 
 document.querySelectorAll('[data-dialog-close]').forEach(button => {
     button.addEventListener('click', () => closeSiteDialog(button.closest('dialog')));
@@ -464,6 +503,7 @@ trackingMode.addEventListener('change', (e) => {
         aiSettingsBlock.style.display = 'flex';
         initializeAI(); 
     }
+    trackAnalytics('tracking_mode_changed', { mode: e.target.value });
 });
 
 aiTargetSelect.addEventListener('change', (e) => {
@@ -570,6 +610,18 @@ const effPixelate = document.getElementById('effPixelate');
 const valPixelate = document.getElementById('valPixelate');
 const effBlur = document.getElementById('effBlur');
 const valBlur = document.getElementById('valBlur');
+
+[
+    [effGrayscale, 'grayscale'],
+    [effInvert, 'invert'],
+    [effPosterize, 'posterize'],
+    [effPixelate, 'pixelate'],
+    [effBlur, 'blur']
+].forEach(([control, effect]) => {
+    control.addEventListener('change', () => {
+        trackAnalytics('effect_changed', { effect, enabled: control.checked });
+    });
+});
 
 let syncColorPickerLabels = () => {};
 const colorPickerSyncCallbacks = [];
@@ -850,6 +902,8 @@ function loadVideoSource(source, { name, demo = null, objectUrl = null } = {}) {
             schedulePausedPreview();
         });
         advanceProjectCoach('video');
+        if (demo) trackAnalytics('demo_loaded', { demo: demo.id });
+        else trackAnalytics('video_uploaded');
     };
 
     video.onerror = function() {
@@ -1347,6 +1401,7 @@ screenshotBtn.addEventListener('click', () => {
     if (!video.src) { alert(t('uploadFirst')); return; }
     const a = document.createElement('a'); a.style.display = 'none'; a.href = canvas.toDataURL('image/png'); a.download = 'trackiez_frame.png'; 
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    trackAnalytics('frame_exported');
     if (!isRecording) {
         recordStatus.textContent = t('frameSaved'); recordStatus.style.color = '#d129a1';
         setTimeout(() => { if (!isRecording) recordStatus.textContent = ''; }, 3000);
@@ -1529,6 +1584,7 @@ async function convertPendingWebmToMp4() {
         );
         const outputBytes = ffmpeg.FS('readFile', outputName);
         downloadBlob(new Blob([outputBytes], { type: 'video/mp4' }), 'trackiez_render.mp4');
+        trackAnalytics('video_exported', { format: 'mp4_browser_conversion' });
         removeFfmpegFile(ffmpeg, inputName);
         removeFfmpegFile(ffmpeg, outputName);
         pendingWebmBlob = null;
@@ -1560,6 +1616,7 @@ async function convertPendingWebmToMp4() {
 downloadWebmBtn.addEventListener('click', () => {
     if (!pendingWebmBlob || isConverting) return;
     downloadBlob(pendingWebmBlob, 'trackiez_render.webm');
+    trackAnalytics('video_exported', { format: 'webm' });
     pendingWebmBlob = null;
     setRecordStatus('videoSaved');
     closeSiteDialog(exportDialog);
@@ -1598,6 +1655,7 @@ recordBtn.addEventListener('click', () => {
 
             if (finalMimeType.toLowerCase().includes('mp4')) {
                 downloadBlob(recordingBlob, 'trackiez_render.mp4');
+                trackAnalytics('video_exported', { format: 'mp4_direct' });
                 setRecordStatus('mp4Saved');
                 setTimeout(() => { if (!isRecording) recordStatus.textContent = ''; }, 4000);
             } else {
@@ -1606,6 +1664,7 @@ recordBtn.addEventListener('click', () => {
         };
         try {
             mediaRecorder.start();
+            trackAnalytics('recording_started');
         } catch (error) {
             recordingStream.getTracks().forEach(track => track.stop());
             recordingStream = null;
@@ -1808,13 +1867,15 @@ function startInterfaceTour() {
     coachSpotlight.hidden = true;
     tourStepIndex = 0;
     tourLayer.hidden = false;
+    trackAnalytics('tutorial_started');
     renderTourStep();
 }
 
-function finishInterfaceTour() {
+function finishInterfaceTour(result = 'completed') {
     tourLayer.hidden = true;
     tourSpotlight.hidden = true;
     setOnboardingFlag(TOUR_STORAGE_KEY);
+    trackAnalytics('tutorial_finished', { result });
 
     if (tourReturnFocus && typeof tourReturnFocus.focus === 'function' && document.contains(tourReturnFocus)) {
         tourReturnFocus.focus({ preventScroll: true });
@@ -1842,13 +1903,15 @@ function startProjectCoach(force = false) {
     coachStepIndex = video.src ? 1 : 0;
     projectCoach.hidden = false;
     coachSpotlight.hidden = false;
+    trackAnalytics('tips_started');
     renderProjectCoachStep();
 }
 
-function finishProjectCoach() {
+function finishProjectCoach(result = 'completed') {
     projectCoach.hidden = true;
     coachSpotlight.hidden = true;
     setOnboardingFlag(PROJECT_GUIDE_STORAGE_KEY);
+    trackAnalytics('tips_finished', { result });
 }
 
 function advanceProjectCoach(action) {
@@ -1878,8 +1941,8 @@ tourNextBtn.addEventListener('click', () => {
     renderTourStep();
 });
 
-tourSkipBtn.addEventListener('click', finishInterfaceTour);
-coachSkipBtn.addEventListener('click', finishProjectCoach);
+tourSkipBtn.addEventListener('click', () => finishInterfaceTour('skipped'));
+coachSkipBtn.addEventListener('click', () => finishProjectCoach('skipped'));
 coachNextBtn.addEventListener('click', () => {
     if (coachStepIndex >= projectGuideSteps.length - 1) finishProjectCoach();
     else {
@@ -1899,18 +1962,36 @@ document.getElementById('restartTipsBtn').addEventListener('click', () => {
 });
 
 [trackingMode, colorSelect, toleranceSlider, minSizeSlider, aiTargetSelect, aiObjectName].forEach(control => {
-    control.addEventListener('input', () => advanceProjectCoach('tracking'));
-    control.addEventListener('change', () => advanceProjectCoach('tracking'));
+    control.addEventListener('input', () => {
+        trackEditorInteraction('tracking');
+        advanceProjectCoach('tracking');
+    });
+    control.addEventListener('change', () => {
+        trackEditorInteraction('tracking');
+        advanceProjectCoach('tracking');
+    });
 });
 
 [vizShape, vizColor, lineWidthSlider, smoothSlider, labelText, hideLabelText, matchLabelColor].forEach(control => {
-    control.addEventListener('input', () => advanceProjectCoach('overlay'));
-    control.addEventListener('change', () => advanceProjectCoach('overlay'));
+    control.addEventListener('input', () => {
+        trackEditorInteraction('overlay');
+        advanceProjectCoach('overlay');
+    });
+    control.addEventListener('change', () => {
+        trackEditorInteraction('overlay');
+        advanceProjectCoach('overlay');
+    });
 });
 
 [effGrayscale, effInvert, effPosterize, valPosterize, effPixelate, valPixelate, effBlur, valBlur].forEach(control => {
-    control.addEventListener('input', () => advanceProjectCoach('effects'));
-    control.addEventListener('change', () => advanceProjectCoach('effects'));
+    control.addEventListener('input', () => {
+        trackEditorInteraction('effects');
+        advanceProjectCoach('effects');
+    });
+    control.addEventListener('change', () => {
+        trackEditorInteraction('effects');
+        advanceProjectCoach('effects');
+    });
 });
 
 recordBtn.addEventListener('click', () => {
@@ -1921,7 +2002,7 @@ document.addEventListener('keydown', event => {
     if (!tourLayer.hidden) {
         if (event.key === 'Escape') {
             event.preventDefault();
-            finishInterfaceTour();
+            finishInterfaceTour('skipped');
         } else if (event.key === 'ArrowRight') {
             event.preventDefault();
             tourNextBtn.click();
@@ -1940,7 +2021,7 @@ document.addEventListener('keydown', event => {
         return;
     }
 
-    if (event.key === 'Escape' && !projectCoach.hidden && !document.querySelector('dialog[open]')) finishProjectCoach();
+    if (event.key === 'Escape' && !projectCoach.hidden && !document.querySelector('dialog[open]')) finishProjectCoach('skipped');
 });
 
 window.addEventListener('resize', updateOnboardingGeometry);
