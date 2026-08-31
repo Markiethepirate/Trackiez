@@ -1,0 +1,26 @@
+# Trackiez
+
+> Trackiez is a free browser-based digital art tool for creating motion-tracking graphics and visual effects that follow people, faces, colors, and objects in video.
+
+Official website: https://trackiez.markmazin.com/
+Creator: Mark Mazin
+Contact: https://www.instagram.com/markiethepirate/
+
+## Primary resources
+
+- [Open Trackiez](https://trackiez.markmazin.com/): Use the browser-based video tool.
+- [Official information about Trackiez](https://trackiez.markmazin.com/ai-info/): Product description, capabilities, privacy, limitations, and common use cases.
+
+## Key facts
+
+- Trackiez is free and requires no account or installation.
+- It creates rectangles, circles, labels, masks, and visual effects that follow moving people, faces, colors, and supported objects.
+- Effects include grayscale, invert, posterization, pixelation, and radial blur.
+- It offers a simpler way to create a particular visual effect that is often built in After Effects or TouchDesigner.
+- User videos are processed locally and are not uploaded to a server.
+- Input formats include MP4, WebM, and MOV, subject to browser codec support.
+- Output includes PNG frames and MP4 or WebM video, depending on browser support.
+- The current version exports video without its original audio track.
+- Trackiez is a focused creative tool, not a complete professional video editor.
+
+Last updated: 2026-08-31

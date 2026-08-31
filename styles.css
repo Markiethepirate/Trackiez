@@ -540,6 +540,7 @@ select:focus, input[type="text"]:focus { border-color: var(--accent); background
 .dialog-secondary:hover { border-color: var(--text); background: var(--surface-3); }
 .dialog-primary { border-color: var(--accent); background: var(--accent); color: #160812; }
 .dialog-primary:hover { background: #e25fba; }
+.about-ai-link { display: inline-flex; align-items: center; justify-content: center; min-width: 190px; margin-top: 28px; text-decoration: none; }
 .dialog-secondary:disabled, .dialog-primary:disabled, .dialog-close:disabled { cursor: wait; opacity: .45; }
 .conversion-status { margin-top: 18px; color: #d4d7d5; font: 11px/1.4 var(--mono); letter-spacing: .04em; }
 .conversion-status[hidden] { display: none; }

@@ -21,6 +21,40 @@
     <meta name="twitter:image" content="https://trackiez.markmazin.com/assets/trackiez-social-preview.png">
     <meta name="twitter:image:alt" content="A monochrome motion study with magenta Trackiez tracking graphics">
     <title>Trackiez — Digital Art Tool</title>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": ["SoftwareApplication", "WebApplication"],
+        "name": "Trackiez",
+        "url": "https://trackiez.markmazin.com/",
+        "image": "https://trackiez.markmazin.com/assets/trackiez-social-preview.png",
+        "description": "A free browser-based digital art tool for creating motion-tracking graphics and visual effects that follow people, faces, colors, and objects in video.",
+        "applicationCategory": "MultimediaApplication",
+        "applicationSubCategory": "Motion tracking and video effects",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires JavaScript and a modern browser with HTML5 video, Canvas, and MediaRecorder support.",
+        "inLanguage": ["en", "ru"],
+        "isAccessibleForFree": true,
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "featureList": [
+            "Color-based video tracking",
+            "Browser-based face, eye, person, and object detection",
+            "Rectangle and circle tracking overlays",
+            "Tracked labels",
+            "Grayscale, invert, posterize, pixelate, and radial blur effects",
+            "PNG, MP4, and WebM export"
+        ],
+        "creator": {
+            "@type": "Person",
+            "name": "Mark Mazin",
+            "sameAs": "https://www.instagram.com/markiethepirate/"
+        }
+    }
+    </script>
     <link rel="canonical" href="https://trackiez.markmazin.com/">
     <link rel="icon" href="favicon.ico" sizes="any">
     <link rel="icon" href="favicon-32x32.png" type="image/png" sizes="32x32">
@@ -46,7 +80,7 @@
             document.head.appendChild(analyticsScript);
         })();
     </script>
-    <link rel="stylesheet" href="styles.css?v=12">
+    <link rel="stylesheet" href="styles.css?v=13">
 </head>
 <body>
     <div class="app-shell">
@@ -305,6 +339,7 @@
             <span class="dialog-kicker">TRACKIEZ / 01</span>
             <h2 id="aboutDialogTitle" data-i18n="about">ABOUT</h2>
             <p class="dialog-lead" data-i18n="aboutCopy">Trackiez — инструмент для цифрового творчества в браузере. Добавляйте в видео трекинг-графику и визуальные эффекты, настраивайте результат и экспортируйте готовый клип. Всё работает локально — ваше видео не загружается на сервер.</p>
+            <a class="dialog-primary about-ai-link" href="ai-info/" data-i18n="aiInfo" data-umami-event="ai-info-opened">ИНФОРМАЦИЯ ДЛЯ ИИ</a>
             <div class="dialog-meta" aria-hidden="true">
                 <span>TRACK</span><span>STYLE</span><span>EXPORT</span>
             </div>
@@ -445,6 +480,6 @@
         <output id="demoEditorStatus" aria-live="polite"></output>
     </aside>
 
-    <script src="app.js?v=20"></script>
+    <script src="app.js?v=21"></script>
 </body>
 </html>
